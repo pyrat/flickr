@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/masci/flickr"
-	"github.com/masci/flickr/photos"
+	// "github.com/masci/flickr/photos"
 	"github.com/masci/flickr/photosets"
 )
 
@@ -40,7 +40,22 @@ func main() {
 	// add to a set
 	// for each remaining filepath (upload and add to set w/progress meter)
 
-	filepaths := getFilePaths()
+	// filepaths := getFilePaths()
+
+	// Run a shift on the filepaths slice
+	first_image, filepaths := filepaths[0], filepaths[1:]
+	photoset, err := uploadImageAndCreateSet(first_image)
+	if err != nil {
+		fmt.Println("Error uploading first photo and creating photoset", err)
+	}
+
+	for _, f := range filepaths {
+		resp, err = uploadImageToSet(f, photoset)
+		if err != nil {
+			fmt.Println("Error uploading image", f.Name())
+		}
+
+	}
 
 	// upload a photo
 	path, _ := filepath.Abs("gopher.jpg")
