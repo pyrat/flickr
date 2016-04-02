@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"path/filepath"
 	"testing"
 )
 
@@ -9,4 +11,10 @@ func TestGetFilePaths(t *testing.T) {
 	if len(paths) == 0 {
 		t.Error("Unable to get the filepaths")
 	}
+}
+
+func TestFilepathBase(t *testing.T) {
+	file_path := "/Users/alastairbrunton"
+	cleaned_base := filepath.Base(file_path)
+	fmt.Println(cleaned_base)
 }
