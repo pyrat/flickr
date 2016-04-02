@@ -28,14 +28,16 @@ func isImage(fileinfo os.FileInfo) bool {
 	ext := filepath.Ext(fileinfo.Name())
 	lowerStr := strings.ToLower(ext)
 
-	if image_extensions[lowerStr[1:len(lowerStr)]] == true {
+	if len(lowerStr) > 0 && image_extensions[lowerStr[1:len(lowerStr)]] == true {
 		return true
 	} else {
 		return false
 	}
 }
 
-func uploadImageAndCreateSet(base_path string, fileinfo os.FileInfo, client *flickr.FlickrClient) (*photosets.PhotosetResponse, error) {
+// There should be a "find or create photoset option" (allowing to add to existing photosets etc.)
+func uploadImageAndCreateSet(base_path string, fileinfo os.FileInfo, client *flickr.FlickrClient, photoset_name string) (string, error) {
+
 	params := flickr.NewUploadParams()
 	path := base_path + "/" + fileinfo.Name()
 	resp, err := flickr.UploadFile(client, path, params)
@@ -46,12 +48,41 @@ func uploadImageAndCreateSet(base_path string, fileinfo os.FileInfo, client *fli
 		}
 	} else {
 		fmt.Println("Photo uploaded:", path, resp.Id)
+		removeImageFile(base_path, fileinfo)
 	}
-
-	return photosets.Create(client, filepath.Base(base_path), "", resp.Id)
+	return findOrCreatePhotoset(client, photoset_name, resp.Id)
 }
 
-func uploadImageToSet(base_path string, fileinfo os.FileInfo, client *flickr.FlickrClient, setResponse *photosets.PhotosetResponse) (*flickr.BasicResponse, error) {
+func findOrCreatePhotoset(client *flickr.FlickrClient, name string, image_id string) (string, error) {
+	exists, photoset_id := photosetExists(client, name)
+	if exists == true {
+		_, err := photosets.AddPhoto(client, photoset_id, image_id)
+		return photoset_id, err
+	} else {
+		resp, err := photosets.Create(client, name, "", image_id)
+		photoset_id = resp.Set.Id
+		return photoset_id, err
+	}
+}
+
+func photosetExists(client *flickr.FlickrClient, name string) (bool, string) {
+	response, err := photosets.GetList(client, true, "", 0)
+	if err != nil {
+		fmt.Println("Error getting photosets list: ", err)
+		os.Exit(2)
+	}
+
+	for _, p := range response.Photosets.Items {
+		if p.Title == name {
+			return true, p.Id
+		}
+	}
+
+	return false, "notfound"
+
+}
+
+func uploadImageToSet(base_path string, fileinfo os.FileInfo, client *flickr.FlickrClient, photoset_id string) (*flickr.BasicResponse, error) {
 	params := flickr.NewUploadParams()
 	path := base_path + "/" + fileinfo.Name()
 	resp, err := flickr.UploadFile(client, path, params)
@@ -62,7 +93,12 @@ func uploadImageToSet(base_path string, fileinfo os.FileInfo, client *flickr.Fli
 		}
 	} else {
 		fmt.Println("Photo uploaded:", path, resp.Id)
+		removeImageFile(base_path, fileinfo)
 	}
 
-	return photosets.AddPhoto(client, setResponse.Set.Id, resp.Id)
+	return photosets.AddPhoto(client, photoset_id, resp.Id)
+}
+
+func removeImageFile(base_path string, fileinfo os.FileInfo) {
+	os.Remove(base_path + "/" + fileinfo.Name())
 }
