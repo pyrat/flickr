@@ -2,21 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/masci/flickr"
 	"os"
-	"path/filepath"
-
-	"github.com/pyrat/flickr"
-	// "github.com/masci/flickr/photos"
-	"github.com/pyrat/flickr/photosets"
 )
 
 func main() {
-	var pause = func() {
-		var foo string
-		fmt.Println("Press a key to continue")
-		fmt.Scanln(&foo)
-	}
-
 	// retrieve Flickr credentials from env vars
 	apik := os.Getenv("FLICKRGO_API_KEY")
 	apisec := os.Getenv("FLICKRGO_API_SECRET")
@@ -39,71 +29,21 @@ func main() {
 	// upload first filepath (add some sort of progress meter here)
 	// add to a set
 	// for each remaining filepath (upload and add to set w/progress meter)
+	base_path := "/Users/alastairbrunton/Pictures/flickr/testupload"
 
-	// filepaths := getFilePaths()
+	filepaths := getFilePaths(base_path)
 
 	// Run a shift on the filepaths slice
 	first_image, filepaths := filepaths[0], filepaths[1:]
-	photoset, err := uploadImageAndCreateSet(first_image)
+	photoset, err := uploadImageAndCreateSet(base_path, first_image, client)
 	if err != nil {
 		fmt.Println("Error uploading first photo and creating photoset", err)
 	}
 
 	for _, f := range filepaths {
-		resp, err = uploadImageToSet(f, photoset)
+		_, err := uploadImageToSet(base_path, f, client, photoset)
 		if err != nil {
 			fmt.Println("Error uploading image", f.Name())
 		}
-
-	}
-
-	// upload a photo
-	path, _ := filepath.Abs("gopher.jpg")
-	params := flickr.NewUploadParams()
-	params.Title = "A Gopher"
-	resp, err := flickr.UploadFile(client, path, params)
-	if err != nil {
-		fmt.Println("Failed uploading:", err)
-		if resp != nil {
-			fmt.Println(resp.ErrorMsg)
-		}
-		os.Exit(1)
-	} else {
-		fmt.Println("Photo uploaded, id:", resp.Id)
-		pause()
-	}
-
-	// create a photoset using above photo as primary
-	respS, err := photosets.Create(client, "GoFlickrSet", "", resp.Id)
-	if err != nil {
-		fmt.Println("Failed creating set:", respS.ErrorMsg())
-		os.Exit(1)
-	} else {
-		fmt.Println("Set created, id:", respS.Set.Id, "url:", respS.Set.Url)
-		pause()
-	}
-
-	// upload another photo using default params
-	path, _ = filepath.Abs("gophers.jpg")
-	resp, err = flickr.UploadFile(client, path, nil)
-	if err != nil {
-		fmt.Println("Failed uploading:", err)
-		if resp != nil {
-			fmt.Println(resp.ErrorMsg())
-		}
-		os.Exit(1)
-	} else {
-		fmt.Println("Photo uploaded, id:", resp.Id)
-		pause()
-	}
-
-	// assign above photo to the photoset
-	respAdd, err := photosets.AddPhoto(client, respS.Set.Id, resp.Id)
-	if err != nil {
-		fmt.Println("Failed adding photo to the set:", err, respAdd.ErrorMsg())
-		os.Exit(1)
-	} else {
-		fmt.Println("Added photo", resp.Id, "to set", respS.Set.Id)
-		pause()
 	}
 }
