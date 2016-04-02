@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/masci/flickr"
-	"github.com/masci/flickr/test"
 )
 
 func main() {
@@ -48,13 +47,6 @@ func main() {
 	// finally, get the access token
 	accessTok, err := flickr.GetAccessToken(client, tok, oauthVerifier)
 	fmt.Println("Successfully retrieved OAuth token", accessTok.OAuthToken)
+	fmt.Println("Successfully retrieved OAuth secret", accessTok.OAuthTokenSecret)
 
-	// check everything works
-	resp, err := test.Login(client)
-	if err != nil {
-		fmt.Println(err)
-
-	} else {
-		fmt.Println(resp.Status, resp.User)
-	}
 }
