@@ -16,8 +16,7 @@ func TestGetFilePaths(t *testing.T) {
 func TestFilepathBase(t *testing.T) {
 	file_path := "/Users/alastairbrunton"
 	cleaned_base := filepath.Base(file_path)
-	fmt.Println(cleaned_base)
 	if cleaned_base != "alastairbrunton" {
-		t.Error("Unable to get teh correct basepath")
+		t.Error("Unable to get the correct basepath")
 	}
 }

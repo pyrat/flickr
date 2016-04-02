@@ -26,7 +26,6 @@ func getFilePaths(base_path string) []os.FileInfo {
 
 func isImage(fileinfo os.FileInfo) bool {
 	ext := filepath.Ext(fileinfo.Name())
-	fmt.Println("Extension is", ext)
 	lowerStr := strings.ToLower(ext)
 
 	if image_extensions[lowerStr[1:len(lowerStr)]] == true {
