@@ -39,6 +39,10 @@ func isImage(fileinfo os.FileInfo) bool {
 func uploadImageAndCreateSet(base_path string, fileinfo os.FileInfo, client *flickr.FlickrClient, photoset_name string) (string, error) {
 
 	params := flickr.NewUploadParams()
+	params.IsPublic = true
+	params.IsFamily = true
+	params.IsFriend = true
+
 	path := base_path + "/" + fileinfo.Name()
 	resp, err := flickr.UploadFile(client, path, params)
 	if err != nil {
@@ -84,6 +88,10 @@ func photosetExists(client *flickr.FlickrClient, name string) (bool, string) {
 
 func uploadImageToSet(base_path string, fileinfo os.FileInfo, client *flickr.FlickrClient, photoset_id string) (*flickr.BasicResponse, error) {
 	params := flickr.NewUploadParams()
+	params.IsPublic = true
+	params.IsFamily = true
+	params.IsFriend = true
+
 	path := base_path + "/" + fileinfo.Name()
 	resp, err := flickr.UploadFile(client, path, params)
 	if err != nil {
